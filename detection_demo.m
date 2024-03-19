@@ -23,13 +23,14 @@ addpath(fullfile(p,'Images'));
 %addpath(fullfile(p,'svm'))
 %addpath(fullfile(p,'libsvm-mat-2.89-3'));
 %% parameters for different methods
-classifier_type='svm';% the classifier used to classification
+% the classifier used to classification
+classifier_type='svm';
 %type_g='partialreconstruction'; %'geodesic';%'euclidean';% 
 type_se='disk';%,'square';%'line';% octagon, dodecagon, hexadecagon,  bresenhamline
-num_scales=4; %number of scales for morphological profiles
-
+%number of scales for morphological profiles
+num_scales=4; 
 %% load the hyperspectral data set and ground truth
-load banTraceLR_0503enf; %load CuboHSI3; %banTraceLRcubo pertenece a Experimento-2017-03-06 21-47-49
+load banTraceLR_0503enf; %load CuboHSI3; 
 
 rand('state',4711007);%6
 %RGB=HR_RGB;
@@ -43,13 +44,15 @@ load banTraceLR_0529enf; %groundtruth de malla, fondo, base, midribs
 load banTraceLR_0503enf_3;
 testlabels=TM;
 figure;imagesc(testlabels)
-trainlabels=double(getlabeltrain_Indian(testlabels,3));%Train_Pavia;%getlabelmatrix
-class_num=7;% the number of the class
+%Train_Pavia;%getlabelmatrix
+trainlabels=double(getlabeltrain_Indian(testlabels,3));
+% the number of the class
+class_num=7;
 
-
-spectraldata=double(LR_HSI); %original
-spectraldataTest=double(LR_HSI2); %test
-
+%original
+spectraldata=double(LR_HSI); 
+%test
+spectraldataTest=double(LR_HSI2);
 
 % display the original image
    figure;imshow(spectraldata(:,:,1),[]);
@@ -70,17 +73,14 @@ OArawT=0;
 AArawT=0;
 KparawT=0;
 
-
 %% classification accuracy for each class
 avrraw=zeros(1,7); %avrraw=zeros(1,14); Original image
 avrrawT=zeros(1,7); %Test image
-
 
 %% ==============classification precessing==========================
 [xind, yind]=find(trainlabels~=0);
 for i=1:length(xind)
     Xtrspe(i,:)=spectraldata(xind(i),yind(i),:);
-
     labeledtrain(i)=trainlabels(xind(i),yind(i));
 end
 
@@ -91,7 +91,7 @@ for jj=1:no_rep
     mask= trainlabels; % training sets
     labels=testlabels; % testing sets
 
-    %%Orginal image
+%%Orginal image
 Xtsspe=reshape(spectraldata,rows*cols,bands);
 classraw=knnclassify(Xtsspe,Xtrspe,labeledtrain');
 outraw=reshape(classraw,rows,cols);
@@ -103,35 +103,25 @@ classrawT=knnclassify(XtsspeT,Xtrspe,labeledtrain');
 outrawT=reshape(classrawT,rowsT,colsT);
 clear XtsspeT spectraldataTest
 
- 
 %% do classification 
     accuracyraw= size(find(outraw==labels),1)/size(find(labels>0),1);
    
     %% calculate the classifying accuracy for each class
     for j=1:class_num
-         avraw(j)=size(find(outraw==labels & outraw==j & labels==j),1)/size(find(labels==j),1);
-        
+         avraw(j)=size(find(outraw==labels & outraw==j & labels==j),1)/size(find(labels==j),1);        
 
          for jjj=1:class_num
              Kraw(j,jjj)=size(find(outraw==j & labels==jjj),1);
          end
     end
-
     disp('Kappa coefficients for Raw data set:')
-    [poraw,peraw,kpraw]=kappa(Kraw);
-     
-    Kparaw=Kparaw+kpraw;
-    
-    avrraw=avrraw+avraw;
-    
-    araw=sum(avraw)/class_num;
-    
+    [poraw,peraw,kpraw]=kappa(Kraw);     
+    Kparaw=Kparaw+kpraw;    
+    avrraw=avrraw+avraw;    
+    araw=sum(avraw)/class_num;    
     OAraw=OAraw+accuracyraw;
-    AAraw=AAraw+araw;
-    
- 
+    AAraw=AAraw+araw; 
 end
-
     Kparaw=Kparaw/no_rep
 avrraw=avrraw/no_rep*100;
 
@@ -169,9 +159,7 @@ annotation('textarrow',[0.273060029282577 0.242313323572474],...
 annotation('textarrow',[0.158125915080527 0.154465592972182],...
     [0.804123711340206 0.845360824742268],'String',{'Background'});
 
-
 %aSt1 = annotation('textbox','String','ST1','LineStyle','none','FontSize', 24,'color','blue');
-
 
 % % % Image test
 subplot(1,3,3);imagesc(outrawT);title(sprintf('Test image'))
