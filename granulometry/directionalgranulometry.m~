@@ -1,0 +1,46 @@
+%  DIRECTIONALGRANULOMETRY Create object for granulometric analysis of images with directional SE's
+%     g = GRANULOMETRY(TYPE,NORIENTATIONS) creates a directional granulometry 
+%     of type TYPE based on bresenham structuring elements with NORIENTATIONS 
+%     different orientations.
+%  
+%     g = GRANULOMETRY(TYPE,NORIENTATIONS, SCALES) creates a directional granulometry 
+%     of type TYPE based on bresenham structuring elements with NORIENTATIONS 
+%     different orientations for the scales determined by SCALES (see GRANULOMETRY)
+%  
+%     See also GRANULOMETRY
+
+classdef directionalgranulometry < granulometry
+    
+    properties
+        norientations;
+    end
+        
+    methods 
+        function obj = directionalgranulometry(type,norientations,varargin)
+            obj@granulometry(type,@(l,a)faststrel('bresenhamline',l,a),varargin{:});
+            obj.norientations = norientations;
+        end
+        
+        
+    end
+
+    methods (Access = public)
+        function [out, R] = preoperation(obj,im,n)
+
+            n = obj.scalegenerator(n);
+            out = cast(-inf,class(im));
+            R = 0;
+            r = inf;
+
+            for i=1:obj.norientations
+                a = 180/obj.norientations*(i-1);
+                l = floor(n*max(abs(sin(a/180*pi)),abs(cos(a/180*pi))));
+                se = obj.segenerator(l,a);
+                out = max(out,obj.openoperation(im,(se)));
+                
+                r = min(r,getradius(se));
+                R = 0.1*max(R,getradius(se));%modified 2011-08-18  0.1*max(R,getradius(se));
+            end
+        end
+    end
+end

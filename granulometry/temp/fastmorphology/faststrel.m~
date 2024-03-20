@@ -1,0 +1,48 @@
+%   FASTSTREL Create morphological structuring element.
+%
+%      SE = FASTSTREL('polygon',lambda,n) creates a flat n-gonal structuring. 
+%      lambda defines the size of the SE. Valid values for n are: 8, 12 and 16.
+%      Uses a decomposition into at most n/2 periodic line structuring elements. 
+%
+%      SE = FASTSTREL('octagon',lambda) 
+%      SE = FASTSTREL('dodecagon',lambda) 
+%      SE = FASTSTREL('hexadecagon',lambda) 
+%
+%      SE = FASTSTREL('bresenhamline',l,a) creates a flat linear structuring element    
+%      with length l.  a specifies the angle (in degrees) of the line as   
+%      measured in a counterclockwise direction from the horizontal axis.      
+%      2*l+1 is the number of neighbours in the structuring element. 
+%      Uses the van Herk-Gill-Werman algorithm, which is approximate for bresenham lines and
+%      has a complexity independant of the size of the structuring element
+%
+%      SE = FASTSTREL('periodicline',P,V) creates a flat structuring element       
+%      containing 2*P+1 members.  V is a two-element vector containing         
+%      integer-valued row and column offsets.  One structuring element member  
+%      is located at the origin.  The other members are located at 1*V, -1*V,  
+%      2*V, -2*V, ..., P*V, -P*V.        
+%      Uses the van Herk-Gill-Werman algorithm, which is exact for periodiclines and
+%      has a complexity independant of the size of the structuring element
+%
+%      SE = FASTSTREL(type,varargin) is a wrapper for STREL(type,varargin)
+%
+%
+
+function se = faststrel(type,varargin)
+
+switch type
+    case {'polygon'}
+	se = basestrel.CreatePolygonSE(varargin{:});
+    case {'octagon'}
+	se = basestrel.CreatePolygonSE(varargin{1},8);
+    case {'dodecagon'}
+	se = basestrel.CreatePolygonSE(varargin{1},12);
+    case {'hexadecagon'}
+	se = basestrel.CreatePolygonSE(varargin{1},16);
+    case {'bresenhamline'}
+	se = basestrel.CreateBresenhamSE(varargin{:});
+    case {'periodicline'}
+	se = basestrel.CreatePeriodicLineSE(varargin{:});
+    otherwise
+	se = basestrel(strel(type,varargin{:}));
+end
+	

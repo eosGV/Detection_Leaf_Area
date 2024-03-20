@@ -1,0 +1,23 @@
+%load data
+%      In all the above, SETYPE defines the family of structuring elements. Valid values
+%      are square, octagon, dodecagon, hexadecagon. SETYPE can also be a function handle 
+%      generating structuring elements.
+load im.mat;
+train_image=pan;
+operator='geodesic';
+SETYPE='octagon';
+scales=5;
+g= granulometry(operator,SETYPE);
+
+openfiles=GenerateFirstNScales(g,train_image,scales);
+
+closefiles=GenerateFirstNScales(g,imcomplement(train_image),scales);
+
+imagesc(openfiles{2});
+figure;imagesc(closefiles{2});
+
+figure;
+subplot(2,2,1);imagesc(openfiles{2});title('Original Image');
+subplot(2,2,2);imagesc(openfiles{2});title('R Channel feature');
+subplot(2,2,3);imagesc(openfiles{2});title('G Channel feature');
+subplot(2,2,4);imagesc(openfiles{2});title('B Channel feature');

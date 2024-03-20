@@ -1,0 +1,34 @@
+%load data
+load im.mat;
+train_image=pan;
+scales=8;
+operator='geodesic';
+SETYPE='octagon';
+g= directionalgranulometry(operator,30);
+
+%create openings with scales
+open_profiles = GenerateFirstNScales(g,train_image,scales);
+
+%create closings with scales
+close_profiles = GenerateFirstNScales(g,imcomplement(train_image),scales);
+
+figure;
+subplot(2,2,1);imagesc(open_profiles{1});title('opening scale 1');
+subplot(2,2,2);imagesc(open_profiles{3});title('opening scale 2');
+subplot(2,2,3);imagesc(open_profiles{5});title('opening scale 3');
+subplot(2,2,4);imagesc(open_profiles{7});title('opening scale 4');
+%subplot(3,3,5);imagesc(open_profiles{5});title('opening scale 5');
+%subplot(3,3,6);imagesc(open_profiles{6});title('opening scale 6');
+
+figure;
+subplot(2,2,1);imagesc(imcomplement(close_profiles{1}));title('opening scale 1');
+subplot(2,2,2);imagesc(imcomplement(close_profiles{3}));title('opening scale 2');
+subplot(2,2,3);imagesc(imcomplement(close_profiles{5}));title('opening scale 3');
+subplot(2,2,4);imagesc(imcomplement(close_profiles{7}));title('opening scale 4');
+%subplot(3,3,5);imagesc(imcomplement(close_profiles{5}));title('opening scale 5');
+%subplot(3,3,6);imagesc(imcomplement(close_profiles{6}));title('opening scale 6');
+
+morph_profiles=[open_profiles, close_profiles]
+morph_profiles=double(cat(3,morph_profiles{:}));
+morph_profiles=double(morph_profiles);
+save('inputdata.mat','morph_profiles');

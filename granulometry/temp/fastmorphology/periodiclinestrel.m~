@@ -1,0 +1,52 @@
+classdef periodiclinestrel < vhgwstrel
+    
+    properties (Access = protected)
+        P
+        V
+    end
+    
+    methods (Access = public)
+        
+        function obj = periodiclinestrel(P,V)
+            if V(2)<0, V = -V; end
+            obj@faststrel(strel('periodicline',P,V));
+            obj.P = P;
+            obj.V = V;
+        end
+        
+    end
+    
+    methods (Access = private)
+            
+        
+        function im = rotateimage(im,se,b)
+            b = cast(b,class(im));
+            [h,w] = size(im);
+            
+            fullh = h + abs(2*se.P*se.V(1));
+            fullw = w + abs(2*se.P*se.V(2));
+            fullim = repmat(b,fullh,fullw);
+            fullim( abs(se.P*se.V(1)) + (1:h), abs(se.P*se.V(2)) + (1:w) ) = im;
+            
+            newh = fullh*se.V(2)+se.V(1);
+            neww = ceil(numel(fullim)/newh);
+            
+            im = [fullim(:); repmat(b,neww*newh-numel(fullim),1);];
+            im = reshape(im,newh,neww)';
+        end
+        
+        function im = unrotateimage(im,se,h,w)
+            im = im';
+            [newh, neww] = size(im);
+            fullh = h + abs(2*se.P*se.V(1));
+            fullw = w + abs(2*se.P*se.V(2));
+            im = im(1:(fullh*fullw));
+            im = reshape(im,fullh,fullw);
+            
+        end
+        
+    end
+    
+end
+            
+            

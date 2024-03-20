@@ -1,0 +1,38 @@
+classdef sequencestrel < basestrel
+    
+    properties (Access = protected)
+        strels;
+    end
+    
+    methods(Access = public)
+        
+        function obj = sequencestrel(strels)
+            obj@basestrel([strels.matlabse]);
+            obj.strels = strels;
+        end
+        
+       
+        function se = GetReflection(se)
+            for i=1:length(se.strels)
+                se.strels(i) = GetReflection(se.strels(i));
+            end
+        end
+    end
+    
+    methods (Access = protected)
+        
+        function out = morphop(op,im,se,shape)
+            out = im;
+            for i=1:length(se.strels)
+                out = feval(op,out,se.strels(i),'full');
+            end
+            [h,w] = size(im);
+            [fullh,fullw] = size(out);
+            if nargin<4||strcmp(shape,'same')
+                out = out( (fullh-h)/2 + (1:h), (fullw-w)/2 + (1:w) );
+            end
+        end            
+        
+    end
+
+end

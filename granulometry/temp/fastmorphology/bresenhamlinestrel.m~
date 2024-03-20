@@ -1,0 +1,117 @@
+classdef bresenhamlinestrel < vhgwstrel
+    
+    properties (Access = protected)
+        angle;
+    end
+    
+    methods (Access = public)
+        
+        function obj = bresenhamlinestrel(length,angle)
+            angle = mod(angle,180);
+            obj@vhgwstrel(length,strel('line',2*length/max(abs(sin(angle/180*pi)),abs(cos(angle/180*pi)))+1,angle));
+            obj.angle = angle;
+            obj.length = length;
+        end
+        
+        
+        
+    end
+    
+    methods (Access = protected)
+            
+        function s = getboundarysize(se)
+            a = se.angle/180*pi;
+            v = abs([sin(a),cos(a)]);
+            v = v/max(v);
+            v = v*se.length;
+            s = ceil(v)+1;
+%             s = [ceil(abs(sin(se.angle/180*pi)*se.length)), ceil(abs(cos(se.angle/180*pi)*se.length))]+1
+        end
+        
+        function im = rotateimage(im,se,b)
+            b = cast(b,class(im));
+            [h,w] = size(im);
+            
+            fullim = generatefullim(im,se,b);
+            s = getboundarysize(se);
+            
+            a = se.angle;
+            if a>45&&a<135
+                a = 90-a;
+                fullim = fullim';
+                s = s(2:-1:1);
+            end
+            a = a/180*pi;
+            [fullh,fullw] = size(fullim);
+            
+            
+            toadd = round( ((1:fullw)-s(2))*(abs(tan(a))));
+            toadd = [diff(toadd) 1];
+            I = find(toadd);
+            
+            newh = fullh;
+            neww = fullw+1;
+            im = repmat(b,newh,neww);
+            einde = 1;
+            eindecol = 0;
+            im(1:2) = b;
+            for i=1:numel(I)
+                start = einde+1+sign(tan(a));
+                startcol = eindecol+1;
+                eindecol = I(i);
+                einde = (eindecol-startcol+1)*fullh+start-1;
+                im(start:einde) = fullim(:,startcol:eindecol);
+            end
+            im((einde+1):end) = b;
+            im = im';
+        end
+        
+        function im = unrotateimage(im,se,h,w)
+            im = im';
+            
+            [newh, neww] = size(im);
+            s = getboundarysize(se);
+            fullh = h + 2*s(1);
+            fullw = w + 2*s(2);
+            
+            fullim = zeros(fullh,fullw,class(im));
+
+            a = se.angle;
+            if a>45&&a<135
+                a = 90-a;
+                fullim = fullim';
+                
+                s = s(2:-1:1);
+            end
+            a = a/180*pi;
+            [fullh,fullw] = size(fullim);
+            
+            
+            toadd = round( ((1:fullw)-s(2))*(abs(tan(a))));
+            toadd = [diff(toadd) 1];
+            
+            I = find(toadd);
+            
+            einde = 1;
+            eindecol = 0;
+            for i=1:numel(I)
+                start = einde+1+sign(tan(a));
+                startcol = eindecol+1;
+                eindecol = I(i);
+                einde = (eindecol-startcol+1)*fullh+start-1;
+                fullim(:,startcol:eindecol) = reshape(im(start:einde),fullh,[]);
+            end
+           
+            im = fullim;
+            a = se.angle;
+            if a>45&&a<135
+                im = im';
+            end
+            
+        end
+        
+    end
+    
+end
+            
+            

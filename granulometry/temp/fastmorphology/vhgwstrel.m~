@@ -1,0 +1,60 @@
+classdef vhgwstrel < basestrel
+    
+    properties (Access = protected)
+        length;
+    end
+    
+    methods (Access = public)
+        
+        function se = reflect(se)
+        end
+    end
+
+    methods (Access = protected)
+        function obj = vhgwstrel(hlength,matlabse)
+            obj@faststrel(matlabse);
+            obj.length = hlength;
+        end
+        
+        function out = rotateimage(im,se,b)
+            error('abstract');
+        end
+         function out = unrotateimage(im,se,h,w)
+            error('abstract');
+        end
+   
+        function out = morphop(op,im,se,shape)
+            
+            switch op
+%                 case {'imclose'}
+%                     di = imdilate(im,se,'same');
+%                     out = imerode(di,reflect(se));
+%                     return;
+%                 case {'imopen'}
+%                     er = imerode(im,se,'same');
+%                     out = imdilate(er,reflect(se));
+%                     return;
+                case {'imdilate','imclose'}
+                    b = -inf;
+                case {'imerode','imopen'}
+                    b = inf;
+                otherwise 
+                    
+                    error('...');
+            end
+            [h,w] = size(im);
+            
+            im = rotateimage(im,se,b);
+            
+            vertse = strel('periodicline',se.length,[1 0]);
+            out = feval(op,im,vertse);
+            
+            
+            out = unrotateimage(out,se,h,w);
+            s = getboundarysize(se);
+            if nargin<4||strcmp(shape,'same')
+                out = out( s(1) + (1:h), s(2) + (1:w) );
+            end
+        end
+    end
+end
